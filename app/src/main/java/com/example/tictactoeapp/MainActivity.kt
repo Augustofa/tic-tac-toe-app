@@ -1,20 +1,30 @@
 package com.example.tictactoeapp
 
+import android.animation.ValueAnimator
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     var gridSize = 3
     var grid = Array(gridSize) { CharArray(gridSize) {' '} }
-    var currentPlayer = 'X'
+    var currentPlayer = 0
+    var symbols = arrayOf('X', 'O')
+    var colors = arrayOf(R.color.blue, R.color.red)
     var gameOver = false
+
+    var originalBackground : Drawable? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.cell22).setOnClickListener(cellClickListener)
         findViewById<Button>(R.id.resetBtn).setOnClickListener { resetGame() }
 
+        originalBackground = findViewById<TextView>(R.id.cell00).background.mutate()
     }
 
     fun cellClicked(row : Int, col : Int, cell : TextView) {
@@ -56,8 +67,9 @@ class MainActivity : AppCompatActivity() {
             showText("Movimento Inválido")
             return
         }
-        cell.text = currentPlayer.toString()
-        grid[row][col] = currentPlayer
+        cell.text = symbols[currentPlayer].toString()
+        cell.setTextColor(ContextCompat.getColor(this, colors[currentPlayer]))
+        grid[row][col] = symbols[currentPlayer]
         val result = checkWinner()
 
         when(result.winner) {
@@ -66,9 +78,14 @@ class MainActivity : AppCompatActivity() {
             }
             'T' -> {
                 showText("Empate!")
+                gameOver = true
             }
             else -> {
-                showText("Vencendor: $currentPlayer")
+                var name = getCurrentPlayerName()
+                showText("Vencendor: $name")
+                highlightWinLine(result)
+                awardPoints()
+                gameOver = true
             }
         }
 
@@ -86,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         for (row in 0 until gridSize) {
             isWin = true
             for (col in 0 until gridSize) {
-                if (grid[row][col] != currentPlayer) {
+                if (grid[row][col] != symbols[currentPlayer]) {
                     isWin = false
                     break
                 }
@@ -94,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
             if (isWin) {
                 val line = (0 until gridSize).map { col -> Pair(row, col) }
-                return WinResult(currentPlayer, line)
+                return WinResult(symbols[currentPlayer], line)
             }
         }
 
@@ -102,41 +119,41 @@ class MainActivity : AppCompatActivity() {
         for (col in 0 until gridSize) {
             isWin = true
             for (row in 0 until gridSize) {
-                if (grid[row][col] != currentPlayer) {
+                if (grid[row][col] != symbols[currentPlayer]) {
                     isWin = false
                     break
                 }
             }
             if (isWin) {
                 val line = (0 until gridSize).map { row -> Pair(row, col) }
-                return WinResult(currentPlayer, line)
+                return WinResult(symbols[currentPlayer], line)
             }
         }
 
         // Main diagonal
         isWin = true
         for (i in 0 until gridSize) {
-            if (grid[i][i] != currentPlayer) {
+            if (grid[i][i] != symbols[currentPlayer]) {
                 isWin = false
                 break
             }
         }
         if (isWin) {
             val line = (0 until gridSize).map { i -> Pair(i, i) }
-            return WinResult(currentPlayer, line)
+            return WinResult(symbols[currentPlayer], line)
         }
 
         // Anti-diagonal
         isWin = true
         for (i in 0 until gridSize) {
-            if (grid[i][gridSize - 1 - i] != currentPlayer) {
+            if (grid[i][gridSize - 1 - i] != symbols[currentPlayer]) {
                 isWin = false
                 break
             }
         }
         if (isWin) {
             val line = (0 until gridSize).map { i -> Pair(i, gridSize - 1 - i) }
-            return WinResult(currentPlayer, line)
+            return WinResult(symbols[currentPlayer], line)
         }
 
         // Tie
@@ -157,8 +174,39 @@ class MainActivity : AppCompatActivity() {
         return WinResult('N')
     }
 
+    fun highlightWinLine(result : WinResult) {
+        for(pos in result.winningLine){
+            val view = getGridView(pos.first, pos.second)
+            highlightCell(view)
+        }
+    }
+
+    fun highlightCell(cell : TextView) {
+        val startColor = (cell.background as GradientDrawable).color?.defaultColor ?: Color.TRANSPARENT
+//        val endColor = ContextCompat.getColor(this, R.color.your_highlight_color)
+        val endColor = Color.GREEN
+
+        val colorAnimator = ValueAnimator.ofArgb(startColor, endColor)
+        colorAnimator.duration = 1000
+
+        colorAnimator.addUpdateListener { animator ->
+            val animatedColor = animator.animatedValue as Int
+            val drawable = cell.background.mutate() as GradientDrawable
+            drawable.setColor(animatedColor)
+        }
+        colorAnimator.start()
+
+
+        cell.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .alpha(0.5f)
+                .setDuration(500)
+                .start()
+    }
+
     fun swapPlayer() {
-        currentPlayer = if(currentPlayer == 'X') 'O' else 'X'
+        currentPlayer = (currentPlayer + 1) % 2
     }
 
     fun resetGame() {
@@ -170,8 +218,26 @@ class MainActivity : AppCompatActivity() {
                 grid[i][j] = ' '
                 val view = getGridView(i, j)
                 view.text = ""
+                val originalColor = ContextCompat.getColor(this, R.color.light_blue)
+                val drawable = view.background.mutate() as GradientDrawable
+                drawable.setColor(originalColor)
+                view.setBackgroundResource(R.drawable.box)
+                view.scaleX = 1f
+                view.scaleY = 1f
+                view.alpha = 1f
             }
         }
+    }
+
+    fun awardPoints() {
+        val id = if(currentPlayer == 0) R.id.score_player1 else R.id.score_player2
+        val scoreView = findViewById<TextView>(id)
+        scoreView.text = (scoreView.text.toString().toInt() + 1).toString()
+    }
+
+    fun getCurrentPlayerName() : String {
+        val id = if(currentPlayer == 0) R.id.name_player1 else R.id.name_player2
+        return findViewById<EditText>(id).text.toString()
     }
 
     fun showText(text : String) {
