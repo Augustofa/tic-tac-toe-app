@@ -76,15 +76,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
-        <TextView style="@style/grid_cell" android:text="X"/>
+        <TextView android:id="@+id/cell00" android:tag="0,0" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell01" android:tag="0,1" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell02" android:tag="0,2" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell10" android:tag="1,0" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell11" android:tag="1,1" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell12" android:tag="1,2" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell20" android:tag="2,0" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell21" android:tag="2,1" style="@style/grid_cell"/>
+        <TextView android:id="@+id/cell22" android:tag="2,2" style="@style/grid_cell"/>
 
     </GridLayout>
+
+    <Button
+        android:id="@+id/resetBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Limpar"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>
