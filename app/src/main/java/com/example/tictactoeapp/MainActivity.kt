@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -16,7 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), GameOverDialogFragment.GameOverListener {
     var gridSize = 3
     var grid = Array(gridSize) { CharArray(gridSize) {' '} }
     var currentPlayer = 0
@@ -78,13 +80,18 @@ class MainActivity : AppCompatActivity() {
             }
             'T' -> {
                 showText("Empate!")
+                gameOverScreen(result)
                 gameOver = true
             }
             else -> {
-                var name = getCurrentPlayerName()
+                var name = getPlayerName(currentPlayer)
                 showText("Vencendor: $name")
                 highlightWinLine(result)
-                awardPoints()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    awardPoints()
+                    gameOverScreen(result)
+                }, 500)
+
                 gameOver = true
             }
         }
@@ -187,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         val endColor = Color.GREEN
 
         val colorAnimator = ValueAnimator.ofArgb(startColor, endColor)
-        colorAnimator.duration = 1000
+        colorAnimator.duration = 500
 
         colorAnimator.addUpdateListener { animator ->
             val animatedColor = animator.animatedValue as Int
@@ -221,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                 val originalColor = ContextCompat.getColor(this, R.color.light_blue)
                 val drawable = view.background.mutate() as GradientDrawable
                 drawable.setColor(originalColor)
-                view.setBackgroundResource(R.drawable.box)
+                view.setBackgroundResource(R.drawable.cell_box)
                 view.scaleX = 1f
                 view.scaleY = 1f
                 view.alpha = 1f
@@ -235,8 +242,8 @@ class MainActivity : AppCompatActivity() {
         scoreView.text = (scoreView.text.toString().toInt() + 1).toString()
     }
 
-    fun getCurrentPlayerName() : String {
-        val id = if(currentPlayer == 0) R.id.name_player1 else R.id.name_player2
+    fun getPlayerName(player : Int) : String {
+        val id = if(player == 0) R.id.name_player1 else R.id.name_player2
         return findViewById<EditText>(id).text.toString()
     }
 
@@ -247,5 +254,29 @@ class MainActivity : AppCompatActivity() {
     fun getGridView(row : Int, col : Int) : TextView {
         val id = resources.getIdentifier("cell$row$col", "id", packageName)
         return findViewById<TextView>(id)
+    }
+
+    override fun onDialogAction(action: DialogAction) {
+        when (action) {
+            DialogAction.PLAY_AGAIN -> {
+                resetGame()
+            }
+            DialogAction.RESET_SCORES -> {
+                recreate()
+            }
+        }
+    }
+
+    private fun gameOverScreen(result: WinResult) {
+        val winnerName = getPlayerName(symbols.indexOf(result.winner))
+        val message = when (result.winner) {
+            'T' -> "Empate!"
+            else -> "${winnerName} Ganhou!"
+        }
+
+        val dialog = GameOverDialogFragment.newInstance(message)
+        dialog.listener = this
+        dialog.isCancelable = false
+        dialog.show(supportFragmentManager, "GameOverDialog")
     }
 }

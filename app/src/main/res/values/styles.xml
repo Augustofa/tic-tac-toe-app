@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="grid_cell">
-        <item name="android:background">@drawable/box</item>
+        <item name="android:background">@drawable/cell_box</item>
         <item name="android:textSize">50sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAlignment">center</item>
@@ -19,5 +19,7 @@
         <item name="android:textSize">40sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAlignment">center</item>
+        <item name="android:gravity">top</item>
+        <item name="android:titleMarginBottom">10dp</item>
     </style>
 </resources>
