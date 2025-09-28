@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <RelativeLayout
+        android:id="@+id/player1_box"
         android:background="@drawable/score_box"
         android:layout_width="150dp"
         android:layout_height="125dp"
@@ -24,7 +25,8 @@
             android:text="Jogador 1"
             android:textAlignment="center"
             android:textColor="@color/blue"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            android:singleLine="true"/>
 
         <TextView
             android:id="@+id/score_player1"
@@ -38,6 +40,7 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/player2_box"
         android:background="@drawable/score_box"
         android:layout_width="150dp"
         android:layout_height="125dp"
@@ -54,7 +57,8 @@
             android:text="Jogador 2"
             android:textAlignment="center"
             android:textColor="@color/red"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            android:singleLine="true"/>
         <TextView
             android:id="@+id/score_player2"
             style="@style/score_text"
@@ -92,13 +96,25 @@
     </GridLayout>
 
     <Button
-        android:id="@+id/resetBtn"
+        android:id="@+id/clearGridBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Limpar"
         android:textSize="24sp"
+        app:layout_constraintVertical_bias="0.3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gridLayout" />
+
+    <Button
+        android:id="@+id/resetScoreButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Zerar Pontos"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clearGridBtn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

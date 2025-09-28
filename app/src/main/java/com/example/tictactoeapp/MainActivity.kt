@@ -10,6 +10,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -22,8 +23,10 @@ class MainActivity : AppCompatActivity(), GameOverDialogFragment.GameOverListene
     var gridSize = 3
     var grid = Array(gridSize) { CharArray(gridSize) {' '} }
     var currentPlayer = 0
+    var startingPlayer = 0
     var symbols = arrayOf('X', 'O')
     var colors = arrayOf(R.color.blue, R.color.red)
+    var playerCards = arrayOf(R.id.player1_box, R.id.player2_box)
     var gameOver = false
 
     var originalBackground : Drawable? = null
@@ -56,9 +59,12 @@ class MainActivity : AppCompatActivity(), GameOverDialogFragment.GameOverListene
         findViewById<TextView>(R.id.cell20).setOnClickListener(cellClickListener)
         findViewById<TextView>(R.id.cell21).setOnClickListener(cellClickListener)
         findViewById<TextView>(R.id.cell22).setOnClickListener(cellClickListener)
-        findViewById<Button>(R.id.resetBtn).setOnClickListener { resetGame() }
+        findViewById<Button>(R.id.clearGridBtn).setOnClickListener { resetGame() }
+        findViewById<Button>(R.id.resetScoreButton).setOnClickListener { recreate() }
 
         originalBackground = findViewById<TextView>(R.id.cell00).background.mutate()
+
+        highlightPlayer(startingPlayer)
     }
 
     fun cellClicked(row : Int, col : Int, cell : TextView) {
@@ -87,8 +93,8 @@ class MainActivity : AppCompatActivity(), GameOverDialogFragment.GameOverListene
                 var name = getPlayerName(currentPlayer)
                 showText("Vencendor: $name")
                 highlightWinLine(result)
+                awardPoints()
                 Handler(Looper.getMainLooper()).postDelayed({
-                    awardPoints()
                     gameOverScreen(result)
                 }, 500)
 
@@ -213,11 +219,32 @@ class MainActivity : AppCompatActivity(), GameOverDialogFragment.GameOverListene
     }
 
     fun swapPlayer() {
-        currentPlayer = (currentPlayer + 1) % 2
+        val nextPlayer = (currentPlayer + 1) % 2
+        highlightPlayer(nextPlayer)
+
+        currentPlayer = nextPlayer
+    }
+    fun highlightPlayer(playerToHighlight : Int) {
+        val otherPlayer = (playerToHighlight + 1) % 2
+        val activePlayerCard = findViewById<RelativeLayout>(playerCards[playerToHighlight])
+        val inactivePlayerCard = findViewById<RelativeLayout>(playerCards[otherPlayer])
+
+        activePlayerCard.animate()
+            .alpha(1.0f)
+            .scaleX(1.1f)
+            .scaleY(1.1f)
+            .setDuration(300)
+            .start()
+
+        inactivePlayerCard.animate()
+            .alpha(0.5f)
+            .scaleX(1.0f)
+            .scaleY(1.0f)
+            .setDuration(300)
+            .start()
     }
 
     fun resetGame() {
-        swapPlayer()
         gameOver = false
 
         for(i in 0 until gridSize) {
